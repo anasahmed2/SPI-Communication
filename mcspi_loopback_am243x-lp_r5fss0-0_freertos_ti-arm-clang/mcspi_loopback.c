@@ -49,11 +49,13 @@
 #include "ti_drivers_open_close.h"
 #include "ti_board_open_close.h"
 #include <string.h>
+#include <stdint.h>
 
-#define APP_SPI_TRANSFER_SIZE   (16)
+#define APP_SPI_FRAME_BITS      (8U)
+#define APP_PACKET_SIZE_BYTES   (512U)
 
-uint8_t gMcspiTxBuffer[APP_SPI_TRANSFER_SIZE];
-uint8_t gMcspiRxBuffer[APP_SPI_TRANSFER_SIZE];
+static uint8_t gRxBuf[APP_PACKET_SIZE_BYTES];
+static uint8_t gTxBuf[APP_PACKET_SIZE_BYTES];
 
 void *mcspi_loopback_main(void *args)
 {
@@ -63,49 +65,47 @@ void *mcspi_loopback_main(void *args)
     Drivers_open();
     Board_driversOpen();
 
-    DebugP_log("SPI SLAVE: Ready and waiting...\r\n");
-
-    /* Slave TX buffer = dummy data (master must clock to receive) */
-    for (uint32_t i = 0; i < APP_SPI_TRANSFER_SIZE; i++)
-    {
-        gMcspiTxBuffer[i] = 0x55;   // Dummy reply bytes
-        gMcspiRxBuffer[i] = 0;
-    }
-
-    MCSPI_Transaction_init(&transaction);
-    transaction.channel   = gConfigMcspi0ChCfg[0].chNum;
-    transaction.dataSize  = 8;
-    transaction.count     = APP_SPI_TRANSFER_SIZE;
-    transaction.txBuf     = gMcspiTxBuffer;   // required even if unused
-    transaction.rxBuf     = gMcspiRxBuffer;
-    transaction.csDisable = FALSE;
-
-    DebugP_log("SPI SLAVE: Waiting for master...\r\n");
-
-    /* This blocks until master drives clock + CS */
-    status = MCSPI_transfer(gMcspiHandle[CONFIG_MCSPI0], &transaction);
-
-    if ((status == SystemP_SUCCESS) &&
-        (transaction.status == MCSPI_TRANSFER_COMPLETED))
-    {
-        DebugP_log("SPI SLAVE: Data received!\r\n");
-
-        for (uint32_t i = 0; i < APP_SPI_TRANSFER_SIZE; i++)
-        {
-            DebugP_log("Byte %d = 0x%02X\r\n", i, gMcspiRxBuffer[i]);
-        }
-    }
-    else
-    {
-        DebugP_log("SPI SLAVE: Transfer FAILED\r\n");
-    }
+    DebugP_log("SPI SLAVE: Ready (echo mode)\r\n");
 
     while (1)
     {
-        ClockP_sleep(1);
-    }
+        /* Prepare buffers for next transaction */
+        memset(gRxBuf, 0, sizeof(gRxBuf));
+        memset(gTxBuf, 0, sizeof(gTxBuf)); /* will be overwritten after receive */
 
-    Board_driversClose();
-    Drivers_close();
-    return NULL;
+        /* 1) Receive 512 bytes from master (while clocking out dummy bytes) */
+        MCSPI_Transaction_init(&transaction);
+        transaction.channel   = gConfigMcspi0ChCfg[0].chNum;  /* must match slave CS detect */
+        transaction.dataSize  = APP_SPI_FRAME_BITS;
+        transaction.count     = APP_PACKET_SIZE_BYTES;        /* frames [web:69] */
+        transaction.txBuf     = gTxBuf;                       /* dummy during RX */
+        transaction.rxBuf     = gRxBuf;
+        transaction.csDisable = TRUE;
+        transaction.timeout   = SystemP_WAIT_FOREVER;
+
+        status = MCSPI_transfer(gMcspiHandle[CONFIG_MCSPI0], &transaction);
+
+        if (!((status == SystemP_SUCCESS) &&
+              (transaction.status == MCSPI_TRANSFER_COMPLETED)))
+        {
+            continue; /* re-arm and wait again */
+        }
+
+        /* 2) Echo back: load TX with what we received */
+        memcpy(gTxBuf, gRxBuf, sizeof(gTxBuf));
+        memset(gRxBuf, 0, sizeof(gRxBuf));
+
+        /* 3) Send echo back to master (master must perform another 512-byte transfer to read it) */
+        MCSPI_Transaction_init(&transaction);
+        transaction.channel   = gConfigMcspi0ChCfg[0].chNum;
+        transaction.dataSize  = APP_SPI_FRAME_BITS;
+        transaction.count     = APP_PACKET_SIZE_BYTES;
+        transaction.txBuf     = gTxBuf;       /* echo data */
+        transaction.rxBuf     = gRxBuf;       /* ignored */
+        transaction.csDisable = TRUE;
+        transaction.timeout   = SystemP_WAIT_FOREVER;
+
+        (void)MCSPI_transfer(gMcspiHandle[CONFIG_MCSPI0], &transaction);
+        /* if this fails, loop will re-arm anyway */
+    }
 }
