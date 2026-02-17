@@ -1,6 +1,8 @@
 /*
  * spi_task.c - SLAVE Version
- * Receives data from Master
+ * 1. Receives 512 bytes from Master.
+ * 2. Prepares that same data for the next transfer.
+ * 3. Sends it back (Echo) when Master clocks again.
  */
 #include <string.h>
 #include <kernel/dpl/DebugP.h>
@@ -8,10 +10,10 @@
 #include "ti_drivers_open_close.h"
 #include "ti_board_open_close.h"
 
-#define APP_MCSPI_MSGSIZE   (100U)
-#define MCSPI_CHANNEL_NUM   (0U)
+#define APP_MCSPI_MSGSIZE   (512U)
+#define NUM_PACKETS         (1000U)
+#define MCSPI_CHANNEL_NUM   (0U) /* Ensure this matches your setup */
 
-/* Buffers */
 uint8_t gSlaveTxBuffer[APP_MCSPI_MSGSIZE] __attribute__((aligned(128)));
 uint8_t gSlaveRxBuffer[APP_MCSPI_MSGSIZE] __attribute__((aligned(128)));
 
@@ -19,58 +21,56 @@ void spi_main_task(void *args)
 {
     int32_t status;
     MCSPI_Transaction spiTransaction;
-    uint32_t i;
-    uint32_t errorCount = 0;
+    uint32_t pkt;
 
-    /* Open Drivers */
     Drivers_open();
     Board_driversOpen();
 
-    DebugP_log("[SLAVE] SPI Task Started.\r\n");
+    DebugP_log("[SLAVE] Ready. Waiting for %d packets...\r\n", NUM_PACKETS);
 
-    /* 1. Prepare Buffers */
-    memset(gSlaveRxBuffer, 0, APP_MCSPI_MSGSIZE);
-    memset(gSlaveTxBuffer, 0xAA, APP_MCSPI_MSGSIZE); // Send dummy 0xAA back
+    for(pkt = 0; pkt < NUM_PACKETS; pkt++)
+    {
+        /* --- STEP 1: Receive Data from Master --- */
+        /* Send Dummy (0x00) while receiving, or send previous packet */
+        memset(gSlaveTxBuffer, 0, APP_MCSPI_MSGSIZE); 
 
-    /* 2. Configure Transaction */
-    MCSPI_Transaction_init(&spiTransaction);
-    spiTransaction.channel   = MCSPI_CHANNEL_NUM;
-    spiTransaction.count     = APP_MCSPI_MSGSIZE;
-    spiTransaction.txBuf     = (void *)gSlaveTxBuffer;
-    spiTransaction.rxBuf     = (void *)gSlaveRxBuffer;
-    spiTransaction.args      = NULL;
+        MCSPI_Transaction_init(&spiTransaction);
+        spiTransaction.channel   = MCSPI_CHANNEL_NUM;
+        spiTransaction.count     = APP_MCSPI_MSGSIZE;
+        spiTransaction.txBuf     = (void *)gSlaveTxBuffer;
+        spiTransaction.rxBuf     = (void *)gSlaveRxBuffer;
+        spiTransaction.args      = NULL;
 
-    DebugP_log("[SLAVE] Ready and Waiting for Master...\r\n");
-
-    /* 3. Wait for Transfer */
-    status = MCSPI_transfer(gMcspiHandle[CONFIG_MCSPI0], &spiTransaction);
-
-    if(status == SystemP_SUCCESS) {
-        DebugP_log("[SLAVE] Data Received. Verifying...\r\n");
-
-        /* 4. Verify Data */
-        for(i = 0; i < APP_MCSPI_MSGSIZE; i++) {
-            if(gSlaveRxBuffer[i] != (uint8_t)i) {
-                errorCount++;
-                if(errorCount < 5) {
-                    DebugP_log("  Mismatch at %d: Exp %d, Got %d\r\n", i, i, gSlaveRxBuffer[i]);
-                }
-            }
+        /* Block until Master sends data */
+        status = MCSPI_transfer(gMcspiHandle[CONFIG_MCSPI0], &spiTransaction);
+        if(status != SystemP_SUCCESS) {
+            DebugP_log("[SLAVE] Error receiving packet %d\r\n", pkt);
+            break; 
         }
 
-        if(errorCount == 0) {
-            DebugP_log("[SLAVE] SUCCESS: All bytes match.\r\n");
-        } else {
-            DebugP_log("[SLAVE] FAILURE: %d errors found.\r\n", errorCount);
-        }
+        /* --- STEP 2: Echo Data Back --- */
+        /* Copy received data to TX buffer for the NEXT transaction */
+        memcpy(gSlaveTxBuffer, gSlaveRxBuffer, APP_MCSPI_MSGSIZE);
 
-    } else {
-        DebugP_log("[SLAVE] Transfer Error: %d\r\n", status);
+        /* Configure transaction to send the Echo */
+        /* We can pass NULL to rxBuf if we don't care what Master sends during echo */
+        MCSPI_Transaction_init(&spiTransaction);
+        spiTransaction.channel   = MCSPI_CHANNEL_NUM;
+        spiTransaction.count     = APP_MCSPI_MSGSIZE;
+        spiTransaction.txBuf     = (void *)gSlaveTxBuffer; // Contains data from Step 1
+        spiTransaction.rxBuf     = (void *)gSlaveRxBuffer; // Receive Master's dummy data
+        
+        /* Block until Master clocks out the data */
+        status = MCSPI_transfer(gMcspiHandle[CONFIG_MCSPI0], &spiTransaction);
+        if(status != SystemP_SUCCESS) {
+            DebugP_log("[SLAVE] Error sending echo %d\r\n", pkt);
+            break;
+        }
     }
 
-    /* Close Drivers */
+    DebugP_log("[SLAVE] Test Finished.\r\n");
+
     Board_driversClose();
     Drivers_close();
-    
-    DebugP_log("[SLAVE] Task Exit.\r\n");
+    vTaskDelete(NULL);
 }
