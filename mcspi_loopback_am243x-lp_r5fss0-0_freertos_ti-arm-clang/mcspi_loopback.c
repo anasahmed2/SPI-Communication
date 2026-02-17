@@ -1,9 +1,8 @@
 /*
- * spi_slave_task.c (Sync + Half Duplex)
+ * spi_slave_task.c (Dumb Echo)
  */
 #include <string.h>
 #include <kernel/dpl/DebugP.h>
-#include <kernel/dpl/ClockP.h>
 #include "FreeRTOS.h"
 #include "task.h"
 #include "ti_drivers_config.h"
@@ -11,7 +10,6 @@
 #include "ti_board_open_close.h"
 
 #define APP_MCSPI_MSGSIZE   (512U)
-#define NUM_PACKETS         (10U) 
 #define MCSPI_CHANNEL_NUM   (0U) 
 
 uint8_t gSlaveTxBuffer[APP_MCSPI_MSGSIZE] __attribute__((aligned(128)));
@@ -19,69 +17,26 @@ uint8_t gSlaveRxBuffer[APP_MCSPI_MSGSIZE] __attribute__((aligned(128)));
 
 void spi_main_task(void *args)
 {
-    int32_t status;
     MCSPI_Transaction spiTransaction;
-    uint32_t pkt;
-    int synced = 0;
-
     Drivers_open();
     Board_driversOpen();
-    DebugP_log("[SLAVE] Waiting for Sync...\r\n");
+    
+    DebugP_log("[SLAVE] Ready. Sending 0x55 forever.\r\n");
 
-    /* SYNC PHASE */
-    while(!synced) {
-        memset(gSlaveTxBuffer, 0xAA, APP_MCSPI_MSGSIZE); // Tell Master we are here
-        memset(gSlaveRxBuffer, 0x00, APP_MCSPI_MSGSIZE);
+    /* Fill TX with 0x55 */
+    memset(gSlaveTxBuffer, 0x55, APP_MCSPI_MSGSIZE);
 
+    while(1) {
         MCSPI_Transaction_init(&spiTransaction);
         spiTransaction.channel = MCSPI_CHANNEL_NUM;
         spiTransaction.count   = APP_MCSPI_MSGSIZE;
         spiTransaction.txBuf   = (void *)gSlaveTxBuffer;
         spiTransaction.rxBuf   = (void *)gSlaveRxBuffer;
         
-        status = MCSPI_transfer(gMcspiHandle[CONFIG_MCSPI0], &spiTransaction);
+        /* Block until Master clocks */
+        MCSPI_transfer(gMcspiHandle[CONFIG_MCSPI0], &spiTransaction);
         
-        /* Check if Master sent 0xFF */
-        if(status == SystemP_SUCCESS && gSlaveRxBuffer[0] == 0xFF) {
-            synced = 1;
-            /* DO NOT LOG HERE - it takes too long. Just switch to test mode. */
-        }
+        /* If we get here, a transfer happened. Just reload and wait again. */
+        /* Optional: Toggle an LED here if you have one to prove life */
     }
-
-    /* TEST PHASE */
-    for(pkt = 0; pkt < NUM_PACKETS; pkt++)
-    {
-        /* STEP 1: RECEIVE DATA */
-        memset(gSlaveTxBuffer, 0x00, APP_MCSPI_MSGSIZE); // Dummy
-        memset(gSlaveRxBuffer, 0xCC, APP_MCSPI_MSGSIZE);
-        
-        MCSPI_Transaction_init(&spiTransaction);
-        spiTransaction.channel = MCSPI_CHANNEL_NUM;
-        spiTransaction.count   = APP_MCSPI_MSGSIZE;
-        spiTransaction.txBuf   = (void *)gSlaveTxBuffer;
-        spiTransaction.rxBuf   = (void *)gSlaveRxBuffer; 
-        
-        status = MCSPI_transfer(gMcspiHandle[CONFIG_MCSPI0], &spiTransaction);
-        if(status != SystemP_SUCCESS) {
-             MCSPI_close(gMcspiHandle[CONFIG_MCSPI0]);
-             MCSPI_open(CONFIG_MCSPI0, NULL);
-             continue;
-        }
-
-        /* STEP 2: SEND ECHO */
-        memcpy(gSlaveTxBuffer, gSlaveRxBuffer, APP_MCSPI_MSGSIZE);
-        
-        MCSPI_Transaction_init(&spiTransaction);
-        spiTransaction.channel = MCSPI_CHANNEL_NUM;
-        spiTransaction.count   = APP_MCSPI_MSGSIZE;
-        spiTransaction.txBuf   = (void *)gSlaveTxBuffer; 
-        spiTransaction.rxBuf   = (void *)gSlaveRxBuffer; 
-        
-        status = MCSPI_transfer(gMcspiHandle[CONFIG_MCSPI0], &spiTransaction);
-    }
-
-    DebugP_log("[SLAVE] Done.\r\n");
-    Board_driversClose();
-    Drivers_close();
-    vTaskDelete(NULL);
 }
