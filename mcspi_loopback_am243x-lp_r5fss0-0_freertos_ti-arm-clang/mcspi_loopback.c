@@ -1,7 +1,5 @@
 /*
- * spi_slave_task.c (Full Duplex Echo Logic)
- * - Receives Packet N.
- * - Copies it to TX Buffer for Packet N+1.
+ * spi_slave_task.c (Half Duplex)
  */
 #include <string.h>
 #include <kernel/dpl/DebugP.h>
@@ -27,39 +25,41 @@ void spi_main_task(void *args)
 
     Drivers_open();
     Board_driversOpen();
-    DebugP_log("[SLAVE] Ready (Full Duplex Echo).\r\n");
-
-    /* Initial Setup: Send 0xAA (Garbage) for first packet (Priming) */
-    memset(gSlaveTxBuffer, 0xAA, APP_MCSPI_MSGSIZE);
+    DebugP_log("[SLAVE] Ready (Half Duplex).\r\n");
 
     for(pkt = 0; pkt < NUM_PACKETS; pkt++)
     {
-        /* Clear RX to clean state */
+        /* --- STEP 1: RECEIVE DATA --- */
         memset(gSlaveRxBuffer, 0xCC, APP_MCSPI_MSGSIZE);
-
+        
         MCSPI_Transaction_init(&spiTransaction);
         spiTransaction.channel = MCSPI_CHANNEL_NUM;
         spiTransaction.count   = APP_MCSPI_MSGSIZE;
-        spiTransaction.txBuf   = (void *)gSlaveTxBuffer; // Pre-loaded with prev packet data
-        spiTransaction.rxBuf   = (void *)gSlaveRxBuffer; // Receiving new data
+        spiTransaction.txBuf   = (void *)gSlaveTxBuffer; // Don't care
+        spiTransaction.rxBuf   = (void *)gSlaveRxBuffer; 
         spiTransaction.args    = NULL;
 
-        /* Block until Master Transaction */
         status = MCSPI_transfer(gMcspiHandle[CONFIG_MCSPI0], &spiTransaction);
-        
-        if(status == SystemP_SUCCESS) {
-             /* 
-              * CRITICAL: Copy received data to TX buffer for NEXT transaction.
-              * This is the "Echo" logic.
-              */
-             memcpy(gSlaveTxBuffer, gSlaveRxBuffer, APP_MCSPI_MSGSIZE);
-             
-             /* Optional: Print first byte received to confirm RX path works */
-             DebugP_log("[SLAVE] Processed Pkt %d (First Byte: %d)\r\n", pkt, gSlaveRxBuffer[0]);
-        } else {
-             DebugP_log("[SLAVE] Error %d at pkt %d. Resync...\r\n", status, pkt);
+        if(status != SystemP_SUCCESS) {
+             DebugP_log("Rx Error %d\r\n", status);
              MCSPI_close(gMcspiHandle[CONFIG_MCSPI0]);
              MCSPI_open(CONFIG_MCSPI0, NULL);
+             continue;
+        }
+
+        /* --- STEP 2: SEND ECHO --- */
+        /* Copy data to TX buffer */
+        memcpy(gSlaveTxBuffer, gSlaveRxBuffer, APP_MCSPI_MSGSIZE);
+        
+        MCSPI_Transaction_init(&spiTransaction);
+        spiTransaction.channel = MCSPI_CHANNEL_NUM;
+        spiTransaction.count   = APP_MCSPI_MSGSIZE;
+        spiTransaction.txBuf   = (void *)gSlaveTxBuffer; // Send Echo
+        spiTransaction.rxBuf   = (void *)gSlaveRxBuffer; // Don't care
+        
+        status = MCSPI_transfer(gMcspiHandle[CONFIG_MCSPI0], &spiTransaction);
+        if(status != SystemP_SUCCESS) {
+             DebugP_log("Tx Error %d\r\n", status);
              continue;
         }
     }
