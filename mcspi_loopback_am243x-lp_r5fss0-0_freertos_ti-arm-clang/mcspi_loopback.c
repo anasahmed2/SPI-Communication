@@ -10,6 +10,7 @@
 
 #include <string.h>
 #include <kernel/dpl/DebugP.h>
+#include <kernel/dpl/ClockP.h>
 #include "FreeRTOS.h"
 #include "task.h"
 #include "ti_drivers_config.h"
@@ -19,7 +20,7 @@
 /* --- Configuration --- */
 #define APP_MCSPI_MSGSIZE   (512U)
 #define NUM_PACKETS         (1000U)
-#define MCSPI_CHANNEL_NUM   (0U) /* Usually 0U for single-channel config */
+#define MCSPI_CHANNEL_NUM   (0U) 
 
 /* Buffers - aligned for cache safety */
 uint8_t gSlaveTxBuffer[APP_MCSPI_MSGSIZE] __attribute__((aligned(128)));
@@ -61,6 +62,8 @@ void spi_main_task(void *args)
         
         if(status != SystemP_SUCCESS) {
             DebugP_log("[SLAVE] Rx Error %d at packet %d\r\n", status, pkt);
+            /* Small delay to try and recover sync */
+            ClockP_usleep(1000);
             break; /* Exit loop on error */
         }
 
