@@ -2,8 +2,6 @@
 
 mcspi_loopback.o: ../mcspi_loopback.c \
  C:/ti/mcu_plus_sdk_am243x_11_00_00_15/source/kernel/dpl/DebugP.h \
- C:/ti/mcu_plus_sdk_am243x_11_00_00_15/source/kernel/dpl/ClockP.h \
- C:/ti/mcu_plus_sdk_am243x_11_00_00_15/source/kernel/dpl/SystemP.h \
  syscfg/ti_drivers_config.h \
  C:/ti/mcu_plus_sdk_am243x_11_00_00_15/source/drivers/hw_include/cslr_soc.h \
  C:/ti/mcu_plus_sdk_am243x_11_00_00_15/source/drivers/hw_include/am64x_am243x/cslr_soc.h \
@@ -52,6 +50,8 @@ mcspi_loopback.o: ../mcspi_loopback.c \
  C:/ti/mcu_plus_sdk_am243x_11_00_00_15/source/drivers/hw_include/hw_types.h \
  syscfg/ti_dpl_config.h \
  C:/ti/mcu_plus_sdk_am243x_11_00_00_15/source/kernel/dpl/HwiP.h \
+ C:/ti/mcu_plus_sdk_am243x_11_00_00_15/source/kernel/dpl/SystemP.h \
+ C:/ti/mcu_plus_sdk_am243x_11_00_00_15/source/kernel/dpl/ClockP.h \
  C:/ti/mcu_plus_sdk_am243x_11_00_00_15/source/kernel/dpl/CacheP.h \
  C:/ti/mcu_plus_sdk_am243x_11_00_00_15/source/kernel/dpl/MpuP_armv7.h \
  C:/ti/mcu_plus_sdk_am243x_11_00_00_15/source/drivers/mcspi.h \
@@ -126,8 +126,6 @@ mcspi_loopback.o: ../mcspi_loopback.c \
  syscfg/ti_board_open_close.h \
  syscfg/ti_board_config.h
 C:/ti/mcu_plus_sdk_am243x_11_00_00_15/source/kernel/dpl/DebugP.h:
-C:/ti/mcu_plus_sdk_am243x_11_00_00_15/source/kernel/dpl/ClockP.h:
-C:/ti/mcu_plus_sdk_am243x_11_00_00_15/source/kernel/dpl/SystemP.h:
 syscfg/ti_drivers_config.h:
 C:/ti/mcu_plus_sdk_am243x_11_00_00_15/source/drivers/hw_include/cslr_soc.h:
 C:/ti/mcu_plus_sdk_am243x_11_00_00_15/source/drivers/hw_include/am64x_am243x/cslr_soc.h:
@@ -176,6 +174,8 @@ C:/ti/mcu_plus_sdk_am243x_11_00_00_15/source/drivers/hw_include/am64x_am243x/csl
 C:/ti/mcu_plus_sdk_am243x_11_00_00_15/source/drivers/hw_include/hw_types.h:
 syscfg/ti_dpl_config.h:
 C:/ti/mcu_plus_sdk_am243x_11_00_00_15/source/kernel/dpl/HwiP.h:
+C:/ti/mcu_plus_sdk_am243x_11_00_00_15/source/kernel/dpl/SystemP.h:
+C:/ti/mcu_plus_sdk_am243x_11_00_00_15/source/kernel/dpl/ClockP.h:
 C:/ti/mcu_plus_sdk_am243x_11_00_00_15/source/kernel/dpl/CacheP.h:
 C:/ti/mcu_plus_sdk_am243x_11_00_00_15/source/kernel/dpl/MpuP_armv7.h:
 C:/ti/mcu_plus_sdk_am243x_11_00_00_15/source/drivers/mcspi.h:
