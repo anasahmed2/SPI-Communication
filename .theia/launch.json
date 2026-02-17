@@ -1,4 +1,14 @@
 {
     "version": "0.2.0",
-    "configurations": []
+    "configurations": [
+        {
+            "name": "mcspi_loopback_am243x-lp_r5fss0-0_freertos_ti-arm-clang",
+            "type": "ccs-debug",
+            "request": "launch",
+            "projectInfo": {
+                "name": "mcspi_loopback_am243x-lp_r5fss0-0_freertos_ti-arm-clang",
+                "resourceId": "/mcspi_loopback_am243x-lp_r5fss0-0_freertos_ti-arm-clang"
+            }
+        }
+    ]
 }
