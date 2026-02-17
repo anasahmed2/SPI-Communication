@@ -1,5 +1,5 @@
 /*
- * spi_slave_task.c (Dumb Echo)
+ * spi_slave_task.c (Simple Echo Loop)
  */
 #include <string.h>
 #include <kernel/dpl/DebugP.h>
@@ -21,10 +21,10 @@ void spi_main_task(void *args)
     Drivers_open();
     Board_driversOpen();
     
-    DebugP_log("[SLAVE] Ready. Sending 0x55 forever.\r\n");
+    DebugP_log("[SLAVE] Ready. Echo Loop Running.\r\n");
 
-    /* Fill TX with 0x55 */
-    memset(gSlaveTxBuffer, 0x55, APP_MCSPI_MSGSIZE);
+    /* Initial TX: 0xAA */
+    memset(gSlaveTxBuffer, 0xAA, APP_MCSPI_MSGSIZE);
 
     while(1) {
         MCSPI_Transaction_init(&spiTransaction);
@@ -33,10 +33,14 @@ void spi_main_task(void *args)
         spiTransaction.txBuf   = (void *)gSlaveTxBuffer;
         spiTransaction.rxBuf   = (void *)gSlaveRxBuffer;
         
-        /* Block until Master clocks */
-        MCSPI_transfer(gMcspiHandle[CONFIG_MCSPI0], &spiTransaction);
-        
-        /* If we get here, a transfer happened. Just reload and wait again. */
-        /* Optional: Toggle an LED here if you have one to prove life */
+        /* Block until transfer complete */
+        if(MCSPI_transfer(gMcspiHandle[CONFIG_MCSPI0], &spiTransaction) == SystemP_SUCCESS) {
+            /* Copy RX to TX for NEXT transfer */
+            memcpy(gSlaveTxBuffer, gSlaveRxBuffer, APP_MCSPI_MSGSIZE);
+        } else {
+            /* Reset on error */
+            MCSPI_close(gMcspiHandle[CONFIG_MCSPI0]);
+            MCSPI_open(CONFIG_MCSPI0, NULL);
+        }
     }
 }
