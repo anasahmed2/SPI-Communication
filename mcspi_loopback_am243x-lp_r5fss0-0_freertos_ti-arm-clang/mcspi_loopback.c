@@ -1,5 +1,5 @@
 /*
- * spi_slave_task.c (Receive All, Send All)
+ * spi_slave_task.c (Handshake)
  */
 #include <string.h>
 #include <kernel/dpl/DebugP.h>
@@ -16,52 +16,66 @@
 uint8_t gSlaveTxBuffer[APP_MCSPI_MSGSIZE] __attribute__((aligned(128)));
 uint8_t gSlaveRxBuffer[APP_MCSPI_MSGSIZE] __attribute__((aligned(128)));
 
-/* Store received data to send back later */
+/* Storage for 10 Packets */
 uint8_t gStorage[NUM_PACKETS][APP_MCSPI_MSGSIZE]; 
 
 void spi_main_task(void *args)
 {
     MCSPI_Transaction spiTransaction;
-    uint32_t pkt;
+    uint32_t pkt = 0;
+    int phase1_done = 0;
 
     Drivers_open();
     Board_driversOpen();
     
-    /* --- PHASE 1: RECEIVE ALL --- */
+    /* --- PHASE 1: RECEIVE UNTIL SIGNAL --- */
     DebugP_log("[SLAVE] Ready to Receive.\r\n");
 
-    for(pkt = 0; pkt < NUM_PACKETS; pkt++)
+    while(!phase1_done)
     {
         MCSPI_Transaction_init(&spiTransaction);
         spiTransaction.channel = MCSPI_CHANNEL_NUM;
         spiTransaction.count   = APP_MCSPI_MSGSIZE;
-        spiTransaction.txBuf   = (void *)gSlaveTxBuffer; // Don't care
+        spiTransaction.txBuf   = (void *)gSlaveTxBuffer; 
         spiTransaction.rxBuf   = (void *)gSlaveRxBuffer;
         
-        if(MCSPI_transfer(gMcspiHandle[CONFIG_MCSPI0], &spiTransaction) == SystemP_SUCCESS) {
+        if(MCSPI_transfer(gMcspiHandle[CONFIG_MCSPI0], &spiTransaction) == SystemP_SUCCESS) 
+        {
+            /* CHECK SIGNAL: First byte 0xFF? */
+            if(gSlaveRxBuffer[0] == 0xFF) {
+                DebugP_log("[SLAVE] Received Signal (0xFF). Switching Mode.\r\n");
+                phase1_done = 1;
+                break;
+            }
+
             /* Store Data */
-            memcpy(gStorage[pkt], gSlaveRxBuffer, APP_MCSPI_MSGSIZE);
-            DebugP_log("[SLAVE] Stored Pkt %d\r\n", pkt);
+            if(pkt < NUM_PACKETS) {
+                memcpy(gStorage[pkt], gSlaveRxBuffer, APP_MCSPI_MSGSIZE);
+                
+                /* Print received data */
+                DebugP_log("[SLAVE] Rx Pkt %d: %02X %02X %02X %02X\r\n", 
+                           pkt, gSlaveRxBuffer[0], gSlaveRxBuffer[1], gSlaveRxBuffer[2], gSlaveRxBuffer[3]);
+                pkt++;
+            }
         }
     }
 
-    DebugP_log("[SLAVE] Receive Complete. Switching to Send...\r\n");
+    /* --- PHASE 2: SEND ALL BACK --- */
+    DebugP_log("[SLAVE] PHASE 2: Sending Echo...\r\n");
 
-    /* --- PHASE 2: SEND ALL --- */
-    for(pkt = 0; pkt < NUM_PACKETS; pkt++)
+    for(int i = 0; i < pkt; i++) // Send back however many we received
     {
         /* Retrieve Data */
-        memcpy(gSlaveTxBuffer, gStorage[pkt], APP_MCSPI_MSGSIZE);
+        memcpy(gSlaveTxBuffer, gStorage[i], APP_MCSPI_MSGSIZE);
 
         MCSPI_Transaction_init(&spiTransaction);
         spiTransaction.channel = MCSPI_CHANNEL_NUM;
         spiTransaction.count   = APP_MCSPI_MSGSIZE;
         spiTransaction.txBuf   = (void *)gSlaveTxBuffer;
-        spiTransaction.rxBuf   = (void *)gSlaveRxBuffer; // Don't care
+        spiTransaction.rxBuf   = (void *)gSlaveRxBuffer; 
         
-        if(MCSPI_transfer(gMcspiHandle[CONFIG_MCSPI0], &spiTransaction) == SystemP_SUCCESS) {
-            DebugP_log("[SLAVE] Sent Pkt %d\r\n", pkt);
-        }
+        MCSPI_transfer(gMcspiHandle[CONFIG_MCSPI0], &spiTransaction);
+        DebugP_log("[SLAVE] Sent Echo Pkt %d\r\n", i);
     }
     
     DebugP_log("[SLAVE] Done.\r\n");
