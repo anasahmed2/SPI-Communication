@@ -9,8 +9,8 @@
 #include "ti_drivers_open_close.h"
 #include "ti_board_open_close.h"
 
-#define APP_MCSPI_MSGSIZE   (64U)
-#define NUM_PACKETS         (10U)
+#define APP_MCSPI_MSGSIZE   (32U)
+#define NUM_PACKETS         (1000U)
 #define MCSPI_CHANNEL_NUM   (0U) 
 
 uint8_t gSlaveTxBuffer[APP_MCSPI_MSGSIZE] __attribute__((aligned(128)));
@@ -38,7 +38,6 @@ void spi_main_task(void *args)
         
         if(MCSPI_transfer(gMcspiHandle[CONFIG_MCSPI0], &spiTransaction) == SystemP_SUCCESS) {
             memcpy(gStorage[pkt], gSlaveRxBuffer, APP_MCSPI_MSGSIZE);
-            DebugP_log("[SLAVE] Stored Pkt %d\r\n", pkt);
         }
     }
 
@@ -70,7 +69,7 @@ void spi_main_task(void *args)
         spiTransaction.rxBuf   = (void *)gSlaveRxBuffer; 
         
         MCSPI_transfer(gMcspiHandle[CONFIG_MCSPI0], &spiTransaction);
-        DebugP_log("[SLAVE] Sent Pkt %d\r\n", pkt);
+        //DebugP_log("[SLAVE] Sent Pkt %d\r\n", pkt);
     }
     
     DebugP_log("[SLAVE] Done.\r\n");

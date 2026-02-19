@@ -47,7 +47,6 @@ mcspi1.$name                       = "CONFIG_MCSPI0";
 mcspi1.mode                        = "PERIPHERAL";
 mcspi1.SPI.$assign                 = "SPI0";
 mcspi1.mcspiChannel[0].$name       = "CONFIG_MCSPI_CH0";
-mcspi1.mcspiChannel[0].bitRate     = 50000000;
 mcspi1.mcspiChannel[0].slvCsSelect = 1;
 mcspi1.mcspiChannel[0].turboEnable = "true";
 mcspi1.mcspiChannel[0].CSn.$assign = "SPI0_CS1";

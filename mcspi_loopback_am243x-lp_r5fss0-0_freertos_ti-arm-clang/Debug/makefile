@@ -4,7 +4,7 @@
 
 SHELL = cmd.exe
 
-CG_TOOL_ROOT := C:/ti/ti_cgt_arm_llvm_4.0.1.LTS
+CG_TOOL_ROOT := C:/ti/ccs2030/ccs/tools/compiler/ti-cgt-armllvm_4.0.3.LTS
 
 GEN_OPTS__FLAG := 
 GEN_CMDS__FLAG := -Wl,-l"syscfg/linker.cmd" 
@@ -149,7 +149,7 @@ all: $(OBJS) $(GEN_CMDS)
 mcspi_loopback_am243x-lp_r5fss0-0_freertos_ti-arm-clang.out: $(OBJS) $(GEN_CMDS)
 	@echo 'Building target: "$@"'
 	@echo 'Invoking: Arm Linker'
-	"C:/ti/ti_cgt_arm_llvm_4.0.1.LTS/bin/tiarmclang.exe" -mcpu=cortex-r5 -mfloat-abi=hard -mfpu=vfpv3-d16 -mlittle-endian -mthumb -DSOC_AM243X -D_DEBUG_=1 -g -Wall -Wno-gnu-variable-sized-type-not-at-end -Wno-unused-function -Wl,-m"mcspi_loopback.Debug.map" -Wl,-i"C:/ti/mcu_plus_sdk_am243x_11_00_00_15/source/kernel/freertos/lib" -Wl,-i"C:/ti/mcu_plus_sdk_am243x_11_00_00_15/source/drivers/lib" -Wl,-i"C:/ti/mcu_plus_sdk_am243x_11_00_00_15/source/board/lib" -Wl,-i"C:/ti/ti_cgt_arm_llvm_4.0.1.LTS/lib" -Wl,--reread_libs -Wl,--diag_suppress=10063 -Wl,--diag_wrap=off -Wl,--display_error_number -Wl,--warn_sections -Wl,--gen_xml_func_hash -Wl,--xml_link_info="mcspi_loopback_am243x-lp_r5fss0-0_freertos_ti-arm-clang_linkInfo.xml" -Wl,--ram_model -o "mcspi_loopback_am243x-lp_r5fss0-0_freertos_ti-arm-clang.out" $(ORDERED_OBJS)
+	"C:/ti/ccs2030/ccs/tools/compiler/ti-cgt-armllvm_4.0.3.LTS/bin/tiarmclang.exe" -mcpu=cortex-r5 -mfloat-abi=hard -mfpu=vfpv3-d16 -mlittle-endian -mthumb -DSOC_AM243X -D_DEBUG_=1 -g -Wall -Wno-gnu-variable-sized-type-not-at-end -Wno-unused-function -Wl,-m"mcspi_loopback.Debug.map" -Wl,-i"C:/ti/mcu_plus_sdk_am243x_11_00_00_15/source/kernel/freertos/lib" -Wl,-i"C:/ti/mcu_plus_sdk_am243x_11_00_00_15/source/drivers/lib" -Wl,-i"C:/ti/mcu_plus_sdk_am243x_11_00_00_15/source/board/lib" -Wl,-i"C:/ti/ccs2030/ccs/tools/compiler/ti-cgt-armllvm_4.0.3.LTS/lib" -Wl,--reread_libs -Wl,--diag_suppress=10063 -Wl,--diag_wrap=off -Wl,--display_error_number -Wl,--warn_sections -Wl,--gen_xml_func_hash -Wl,--xml_link_info="mcspi_loopback_am243x-lp_r5fss0-0_freertos_ti-arm-clang_linkInfo.xml" -Wl,--ram_model -o "mcspi_loopback_am243x-lp_r5fss0-0_freertos_ti-arm-clang.out" $(ORDERED_OBJS)
 	@echo 'Finished building target: "$@"'
 	@echo ' '
 	@$(MAKE) --no-print-directory post-build
@@ -164,7 +164,7 @@ clean:
 	-@echo ' '
 
 post-build:
-	-$(MAKE) -C C:\Users\AnasAhmed\SPI_SLAVE\mcspi_loopback_am243x-lp_r5fss0-0_freertos_ti-arm-clang -f makefile_ccs_bootimage_gen OUTNAME=mcspi_loopback_am243x-lp_r5fss0-0_freertos_ti-arm-clang PROFILE=Debug MCU_PLUS_SDK_PATH=C:/ti/mcu_plus_sdk_am243x_11_00_00_15 CG_TOOL_ROOT=C:/ti/ti_cgt_arm_llvm_4.0.1.LTS CCS_INSTALL_DIR=C:\ti\ccs2030\ccs\ CCS_IDE_MODE=desktop DEVICE=am243x
+	-$(MAKE) -C C:\Users\Admin\SPI-Communication\mcspi_loopback_am243x-lp_r5fss0-0_freertos_ti-arm-clang -f makefile_ccs_bootimage_gen OUTNAME=mcspi_loopback_am243x-lp_r5fss0-0_freertos_ti-arm-clang PROFILE=Debug MCU_PLUS_SDK_PATH=C:/ti/mcu_plus_sdk_am243x_11_00_00_15 CG_TOOL_ROOT=C:/ti/ccs2030/ccs/tools/compiler/ti-cgt-armllvm_4.0.3.LTS CCS_INSTALL_DIR=C:\ti\ccs2030\ccs\ CCS_IDE_MODE=desktop DEVICE=am243x
 	-@echo ' '
 
 .PHONY: all clean dependents
