@@ -10,7 +10,8 @@
 "./syscfg/ti_enet_soc.o"
 "./syscfg/ti_enet_lwipif.o"
 "./main.o"
-"./mcspi_loopback.o"
+"./master_task.o"
+"./slave_task.o"
 -l"syscfg/linker.cmd"
 -lfreertos.am243x.r5f.ti-arm-clang.debug.lib
 -ldrivers.am243x.r5f.ti-arm-clang.debug.lib
