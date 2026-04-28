@@ -21,7 +21,8 @@ C_SRCS += \
 ./syscfg/ti_enet_soc.c \
 ./syscfg/ti_enet_lwipif.c \
 ../main.c \
-../mcspi_loopback.c 
+../master_task.c \
+../slave_task.c 
 
 GEN_CMDS += \
 ./syscfg/linker.cmd 
@@ -56,7 +57,8 @@ C_DEPS += \
 ./syscfg/ti_enet_soc.d \
 ./syscfg/ti_enet_lwipif.d \
 ./main.d \
-./mcspi_loopback.d 
+./master_task.d \
+./slave_task.d 
 
 OBJS += \
 ./syscfg/ti_dpl_config.o \
@@ -71,7 +73,8 @@ OBJS += \
 ./syscfg/ti_enet_soc.o \
 ./syscfg/ti_enet_lwipif.o \
 ./main.o \
-./mcspi_loopback.o 
+./master_task.o \
+./slave_task.o 
 
 GEN_MISC_FILES += \
 ./syscfg/ti_dpl_config.h \
@@ -100,7 +103,8 @@ OBJS__QUOTED += \
 "syscfg\ti_enet_soc.o" \
 "syscfg\ti_enet_lwipif.o" \
 "main.o" \
-"mcspi_loopback.o" 
+"master_task.o" \
+"slave_task.o" 
 
 GEN_MISC_FILES__QUOTED += \
 "syscfg\ti_dpl_config.h" \
@@ -126,7 +130,8 @@ C_DEPS__QUOTED += \
 "syscfg\ti_enet_soc.d" \
 "syscfg\ti_enet_lwipif.d" \
 "main.d" \
-"mcspi_loopback.d" 
+"master_task.d" \
+"slave_task.d" 
 
 GEN_FILES__QUOTED += \
 "syscfg\ti_dpl_config.c" \
@@ -158,6 +163,7 @@ C_SRCS__QUOTED += \
 "./syscfg/ti_enet_soc.c" \
 "./syscfg/ti_enet_lwipif.c" \
 "../main.c" \
-"../mcspi_loopback.c" 
+"../master_task.c" \
+"../slave_task.c" 
 
 

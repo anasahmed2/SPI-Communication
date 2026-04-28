@@ -1,7 +1,9 @@
 # FIXED
 
-mcspi_loopback.o: ../mcspi_loopback.c \
+master_task.o: ../master_task.c \
  C:/ti/mcu_plus_sdk_am243x_11_00_00_15/source/kernel/dpl/DebugP.h \
+ C:/ti/mcu_plus_sdk_am243x_11_00_00_15/source/kernel/dpl/ClockP.h \
+ C:/ti/mcu_plus_sdk_am243x_11_00_00_15/source/kernel/dpl/SystemP.h \
  C:/ti/mcu_plus_sdk_am243x_11_00_00_15/source/kernel/freertos/FreeRTOS-Kernel/include/FreeRTOS.h \
  C:/ti/mcu_plus_sdk_am243x_11_00_00_15/source/kernel/freertos/config/am243x/r5f/FreeRTOSConfig.h \
  C:/ti/mcu_plus_sdk_am243x_11_00_00_15/source/kernel/freertos/FreeRTOS-Kernel/include/projdefs.h \
@@ -9,7 +11,6 @@ mcspi_loopback.o: ../mcspi_loopback.c \
  C:/ti/mcu_plus_sdk_am243x_11_00_00_15/source/kernel/freertos/FreeRTOS-Kernel/include/deprecated_definitions.h \
  C:/ti/mcu_plus_sdk_am243x_11_00_00_15/source/kernel/freertos/portable/TI_ARM_CLANG/ARM_CR5F/portmacro.h \
  C:/ti/mcu_plus_sdk_am243x_11_00_00_15/source/kernel/dpl/HwiP.h \
- C:/ti/mcu_plus_sdk_am243x_11_00_00_15/source/kernel/dpl/SystemP.h \
  C:/ti/mcu_plus_sdk_am243x_11_00_00_15/source/kernel/nortos/dpl/r5/HwiP_armv7r_vim.h \
  C:/ti/mcu_plus_sdk_am243x_11_00_00_15/source/drivers/hw_include/soc_config.h \
  C:/ti/mcu_plus_sdk_am243x_11_00_00_15/source/drivers/hw_include/am64x_am243x/soc_config.h \
@@ -63,7 +64,6 @@ mcspi_loopback.o: ../mcspi_loopback.c \
  syscfg/ti_drivers_config.h \
  C:/ti/mcu_plus_sdk_am243x_11_00_00_15/source/drivers/hw_include/hw_types.h \
  syscfg/ti_dpl_config.h \
- C:/ti/mcu_plus_sdk_am243x_11_00_00_15/source/kernel/dpl/ClockP.h \
  C:/ti/mcu_plus_sdk_am243x_11_00_00_15/source/kernel/dpl/CacheP.h \
  C:/ti/mcu_plus_sdk_am243x_11_00_00_15/source/kernel/dpl/MpuP_armv7.h \
  C:/ti/mcu_plus_sdk_am243x_11_00_00_15/source/drivers/mcspi.h \
@@ -136,6 +136,8 @@ mcspi_loopback.o: ../mcspi_loopback.c \
  syscfg/ti_board_open_close.h \
  syscfg/ti_board_config.h
 C:/ti/mcu_plus_sdk_am243x_11_00_00_15/source/kernel/dpl/DebugP.h:
+C:/ti/mcu_plus_sdk_am243x_11_00_00_15/source/kernel/dpl/ClockP.h:
+C:/ti/mcu_plus_sdk_am243x_11_00_00_15/source/kernel/dpl/SystemP.h:
 C:/ti/mcu_plus_sdk_am243x_11_00_00_15/source/kernel/freertos/FreeRTOS-Kernel/include/FreeRTOS.h:
 C:/ti/mcu_plus_sdk_am243x_11_00_00_15/source/kernel/freertos/config/am243x/r5f/FreeRTOSConfig.h:
 C:/ti/mcu_plus_sdk_am243x_11_00_00_15/source/kernel/freertos/FreeRTOS-Kernel/include/projdefs.h:
@@ -143,7 +145,6 @@ C:/ti/mcu_plus_sdk_am243x_11_00_00_15/source/kernel/freertos/FreeRTOS-Kernel/inc
 C:/ti/mcu_plus_sdk_am243x_11_00_00_15/source/kernel/freertos/FreeRTOS-Kernel/include/deprecated_definitions.h:
 C:/ti/mcu_plus_sdk_am243x_11_00_00_15/source/kernel/freertos/portable/TI_ARM_CLANG/ARM_CR5F/portmacro.h:
 C:/ti/mcu_plus_sdk_am243x_11_00_00_15/source/kernel/dpl/HwiP.h:
-C:/ti/mcu_plus_sdk_am243x_11_00_00_15/source/kernel/dpl/SystemP.h:
 C:/ti/mcu_plus_sdk_am243x_11_00_00_15/source/kernel/nortos/dpl/r5/HwiP_armv7r_vim.h:
 C:/ti/mcu_plus_sdk_am243x_11_00_00_15/source/drivers/hw_include/soc_config.h:
 C:/ti/mcu_plus_sdk_am243x_11_00_00_15/source/drivers/hw_include/am64x_am243x/soc_config.h:
@@ -197,7 +198,6 @@ C:/ti/mcu_plus_sdk_am243x_11_00_00_15/source/kernel/freertos/FreeRTOS-Kernel/inc
 syscfg/ti_drivers_config.h:
 C:/ti/mcu_plus_sdk_am243x_11_00_00_15/source/drivers/hw_include/hw_types.h:
 syscfg/ti_dpl_config.h:
-C:/ti/mcu_plus_sdk_am243x_11_00_00_15/source/kernel/dpl/ClockP.h:
 C:/ti/mcu_plus_sdk_am243x_11_00_00_15/source/kernel/dpl/CacheP.h:
 C:/ti/mcu_plus_sdk_am243x_11_00_00_15/source/kernel/dpl/MpuP_armv7.h:
 C:/ti/mcu_plus_sdk_am243x_11_00_00_15/source/drivers/mcspi.h:
