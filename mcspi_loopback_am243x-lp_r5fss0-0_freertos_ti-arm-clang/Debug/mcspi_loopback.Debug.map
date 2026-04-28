@@ -1,7 +1,7 @@
 ******************************************************************************
             TI ARM Clang Linker PC v4.0.3                      
 ******************************************************************************
->> Linked Wed Feb 18 23:16:42 2026
+>> Linked Thu Feb 19 11:54:24 2026
 
 OUTPUT FILE NAME:   <mcspi_loopback_am243x-lp_r5fss0-0_freertos_ti-arm-clang.out>
 ENTRY POINT SYMBOL: "_vectors"  address: 00000000
